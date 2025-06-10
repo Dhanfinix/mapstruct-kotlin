@@ -16,6 +16,9 @@ import javax.lang.model.util.ElementFilter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Provides builder support for Kotlin classes in MapStruct.
+ */
 public class KotlinBuilderProvider extends DefaultBuilderProvider implements BuilderProvider {
 
     private static final String BUILDER_CLASS_POSTFIX = "Builder";
@@ -64,7 +67,7 @@ public class KotlinBuilderProvider extends DefaultBuilderProvider implements Bui
         List<ExecutableElement> builderCreatonMethods = ElementFilter.methodsIn(builder.getEnclosedElements())
                 .stream()
                 .filter(executableElement -> BUILDER_METHOD_NAME.equals(executableElement.getSimpleName().toString()))
-                .collect(Collectors.toList());
+                .toList();
 
         return new BuilderInfo.Builder()
                 .builderCreationMethod(builderCreatonMethods.get(0))
@@ -82,7 +85,7 @@ public class KotlinBuilderProvider extends DefaultBuilderProvider implements Bui
             builderQualifiedName.append(((TypeElement) enclosingElement).getQualifiedName().toString());
         }
 
-        if (builderQualifiedName.length() > 0) {
+        if (!builderQualifiedName.isEmpty()) {
             builderQualifiedName.append(".");
         }
 

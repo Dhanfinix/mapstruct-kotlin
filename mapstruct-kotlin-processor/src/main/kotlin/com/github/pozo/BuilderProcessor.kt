@@ -4,14 +4,11 @@ import com.github.pozo.BuilderGenerator.Builder.addBuilderMethod
 import com.github.pozo.BuilderGenerator.Create.addCreateMethod
 import com.github.pozo.BuilderGenerator.Field.addPrivateField
 import com.github.pozo.BuilderGenerator.Setter.addSetterMethod
-import com.github.pozo.BuilderGenerator.readHeader
 import com.google.auto.service.AutoService
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeVariableName
-import kotlinx.metadata.Flag
-import kotlinx.metadata.Flags
-import kotlinx.metadata.KmClassVisitor
+import kotlinx.metadata.isData
 import kotlinx.metadata.jvm.KotlinClassMetadata
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
@@ -20,8 +17,6 @@ import javax.lang.model.SourceVersion
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
 import javax.lang.model.util.ElementFilter
-import kotlin.streams.toList
-
 
 @AutoService(Processor::class)
 class BuilderProcessor : AbstractProcessor() {
@@ -46,27 +41,39 @@ class BuilderProcessor : AbstractProcessor() {
     }
 
     private fun isAnnotatedByKotlin(it: TypeElement): Boolean {
+        processingEnv.messager.printMessage(
+            javax.tools.Diagnostic.Kind.NOTE,
+            "Checking if ${it.simpleName} is a Kotlin class..."
+        )
         return it.annotationMirrors
-            .stream()
-            .filter { Metadata::class.java.canonicalName == it.annotationType.toString() }
-            .count() > 0
+            .any { annotation -> annotation.annotationType.toString() == Metadata::class.java.canonicalName }
     }
 
     private fun isDataClass(it: TypeElement): Boolean {
-        val kotlinClassHeader = it.readHeader()
-        val kotlinClassMetadata = KotlinClassMetadata.read(kotlinClassHeader)
-
-        var isDataClass = false
-        when (kotlinClassMetadata) {
-            is KotlinClassMetadata.Class -> {
-                kotlinClassMetadata.accept(object : KmClassVisitor() {
-                    override fun visit(flags: Flags, name: kotlinx.metadata.ClassName) {
-                        isDataClass = Flag.Class.IS_DATA(flags)
-                    }
-                })
-            }
+        val metadata = it.getAnnotation(Metadata::class.java)
+        if (metadata == null) {
+            processingEnv.messager.printMessage(
+                javax.tools.Diagnostic.Kind.ERROR,
+                "No Kotlin metadata found on ${it.simpleName}"
+            )
+            return false
         }
-        return isDataClass
+
+        val kotlinClassMetadata = KotlinClassMetadata.readStrict(metadata)
+        return if (kotlinClassMetadata is KotlinClassMetadata.Class) {
+            val isData = kotlinClassMetadata.kmClass.isData
+            processingEnv.messager.printMessage(
+                javax.tools.Diagnostic.Kind.NOTE,
+                "${it.simpleName} isDataClass: $isData"
+            )
+            isData
+        } else {
+            processingEnv.messager.printMessage(
+                javax.tools.Diagnostic.Kind.ERROR,
+                "Unsupported Kotlin metadata type for ${it.simpleName}"
+            )
+            false
+        }
     }
 
     private fun generateBuilder(typeElement: TypeElement) {
@@ -90,10 +97,7 @@ class BuilderProcessor : AbstractProcessor() {
                 }
             this
         }.let {
-            JavaFile.builder(
-                packageName,
-                it.build()
-            )
+            JavaFile.builder(packageName, it.build())
         }.apply {
             this.build().writeTo(processingEnv.filer)
         }
@@ -104,7 +108,7 @@ class BuilderProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedSourceVersion(): SourceVersion {
-        return SourceVersion.RELEASE_8
+        return SourceVersion.RELEASE_17
     }
 
     override fun getSupportedOptions(): Set<String> {

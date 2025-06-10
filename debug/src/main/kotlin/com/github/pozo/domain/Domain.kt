@@ -5,12 +5,12 @@ import com.github.pozo.KotlinBuilder
 interface Bar
 
 @KotlinBuilder
-data class Foo<T : Bar, K : String>(
+data class Foo<T : Bar>(
     val bar: T,
-    val kar: K
+    val kar: String
 ) {
 
-    fun bar(k: K): T {
+    fun bar(k: String): T {
         return bar
     }
 }

@@ -5,7 +5,7 @@ import com.squareup.javapoet.FieldSpec
 import com.squareup.javapoet.MethodSpec
 import com.squareup.javapoet.TypeName
 import com.squareup.javapoet.TypeSpec
-import kotlinx.metadata.jvm.KotlinClassHeader
+import java.util.Locale
 import javax.lang.model.element.Element
 import javax.lang.model.element.Modifier
 import javax.lang.model.element.TypeElement
@@ -14,7 +14,6 @@ import javax.lang.model.element.VariableElement
 object BuilderGenerator {
 
     object Field {
-
         fun TypeSpec.Builder.addPrivateField(variableElement: VariableElement): FieldSpec {
             return FieldSpec.builder(
                 variableElement.type(),
@@ -27,7 +26,6 @@ object BuilderGenerator {
     }
 
     object Setter {
-
         fun TypeSpec.Builder.addSetterMethod(
             variableElement: VariableElement, packageName: String, builderClassName: String
         ): VariableElement {
@@ -45,7 +43,9 @@ object BuilderGenerator {
         private fun createSetterMethodSpec(
             fieldName: String, packageName: String, builderClassName: String, fieldType: TypeName
         ): MethodSpec {
-            return MethodSpec.methodBuilder("set${fieldName.capitalize()}")
+            return MethodSpec.methodBuilder("set${fieldName.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+            }}")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(ClassName.get(packageName, builderClassName))
                 .addParameter(fieldType, fieldName)
@@ -56,26 +56,30 @@ object BuilderGenerator {
     }
 
     object Create {
-
         private const val METHOD_NAME = "create"
 
         fun TypeSpec.Builder.addCreateMethod(it: TypeElement, fields: List<FieldSpec>) {
-            val guessedReturnValueType = ClassName.bestGuess("${it.qualifiedName}")
+            val guessedReturnValueType = ClassName.bestGuess(it.qualifiedName.toString())
             val createMethod = createCreateMethodSpec(guessedReturnValueType, fields)
             this.addMethod(createMethod)
         }
 
-        private fun createCreateMethodSpec(guessedReturnValueType: ClassName?, fields: List<FieldSpec>): MethodSpec {
+        private fun createCreateMethodSpec(
+            guessedReturnValueType: ClassName, fields: List<FieldSpec>
+        ): MethodSpec {
             return MethodSpec.methodBuilder(METHOD_NAME)
                 .addModifiers(Modifier.PUBLIC)
                 .returns(guessedReturnValueType)
-                .addStatement("return new \$T(\$L)", guessedReturnValueType, fields.joinToString { it.name })
+                .addStatement(
+                    "return new \$T(\$L)",
+                    guessedReturnValueType,
+                    fields.joinToString { it.name }
+                )
                 .build()
         }
     }
 
     object Builder {
-
         private const val METHOD_NAME = "builder"
 
         fun TypeSpec.Builder.addBuilderMethod(packageName: String, builderClassName: String) {
@@ -89,15 +93,6 @@ object BuilderGenerator {
                 .returns(ClassName.get(packageName, builderClassName))
                 .addStatement("return new \$T()", ClassName.get(packageName, builderClassName))
                 .build()
-        }
-    }
-
-    // https://github.com/JetBrains/kotlin/tree/master/libraries/kotlinx-metadata/jvm
-    // https://github.com/square/moshi/pull/570/files
-    @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-    fun Element.readHeader(): KotlinClassHeader {
-        return getAnnotation(Metadata::class.java).run {
-            KotlinClassHeader(kind, metadataVersion, bytecodeVersion, data1, data2, extraString, packageName, extraInt)
         }
     }
 

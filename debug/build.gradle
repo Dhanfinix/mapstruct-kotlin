@@ -1,24 +1,29 @@
-apply plugin: 'kotlin'
-apply plugin: 'kotlin-kapt'
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-sourceCompatibility = JavaVersion.VERSION_1_8
+plugins {
+    id 'kotlin'
+    id 'kotlin-kapt'
+}
 
 repositories {
     mavenCentral()
-    maven { url "https://kotlin.bintray.com/kotlinx" }
 }
 
 dependencies {
-    api(project(':mapstruct-kotlin-builder'))
-    kapt(project(':mapstruct-kotlin-processor'))
+    api project(':mapstruct-kotlin-builder')
+    kapt project(':mapstruct-kotlin-processor')
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2' // Updated JUnit version
 }
 
-compileKotlin {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17)) // Updated to match your Java version
+    }
 }
-compileTestKotlin {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = "17"
 }
