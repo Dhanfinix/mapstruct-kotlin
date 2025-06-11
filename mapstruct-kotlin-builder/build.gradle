@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
 import com.vanniktech.maven.publish.SonatypeHost
 
 plugins {
@@ -66,61 +65,6 @@ mavenPublishing {
         }
     }
 }
-
-//publishing {
-//    publications {
-//        maven(MavenPublication) {
-//            artifactId = "mapstruct-kotlin"
-//
-//            from components.java
-//            artifact tasks.named("sourcesJar").get()
-//            artifact tasks.named("javadocJar").get()
-//
-//            pom {
-//                name = "mapstruct-kotlin"
-//                description = "KotlinBuilder annotation plugin for MapStruct"
-//                url = "https://github.com/Dhanfinix/mapstruct-kotlin"
-//                licenses {
-//                    license {
-//                        name = "MIT License"
-//                        url = "https://opensource.org/licenses/MIT"
-//                    }
-//                }
-//                developers {
-//                    developer {
-//                        id = "dhanfinix"
-//                        name = "Ramdhan"
-//                        email = "muhammadramdhan541@gmail.com"
-//                    }
-//                }
-//                scm {
-//                    url = "https://github.com/Dhanfinix/mapstruct-kotlin"
-//                    connection = "scm:git:git://github.com/Dhanfinix/mapstruct-kotlin.git"
-//                    developerConnection = "scm:git:ssh://github.com:Dhanfinix/mapstruct-kotlin.git"
-//                }
-//            }
-//        }
-//    }
-//    repositories {
-//        maven {
-//            url "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-//            credentials {
-//                username = findProperty("credential_name")
-//                password = findProperty("credential_pass")
-//            }
-//        }
-//    }
-//}
-
-//signing {
-////    useGpgCmd()
-//    useInMemoryPgpKeys(
-//        findProperty("signing.keyId") as String,
-//        findProperty("signing.secretKey") as String,
-//        findProperty("signing.password") as String
-//    )
-//    sign publishing.publications.maven
-//}
 signing {
     useInMemoryPgpKeys(
             findProperty("signing.keyId") as String,

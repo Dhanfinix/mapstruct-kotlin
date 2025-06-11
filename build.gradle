@@ -1,6 +1,6 @@
 allprojects {
     group 'io.github.dhanfinix'
-    version '1.0.0-alpha3'
+    version '1.0.0-alpha4'
 }
 
 buildscript {
@@ -10,7 +10,7 @@ buildscript {
         kotlinBuilderAnnotationVersion = '1.0-SNAPSHOT'
         autoServiceVersion = '1.0-rc7'
         mapstructVersion = '1.6.3'
-        javaPoetVersion = '1.11.1'
+        javaPoetVersion = '1.13.0'
     }
 
     repositories {

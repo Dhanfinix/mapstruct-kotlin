@@ -82,6 +82,7 @@ class BuilderProcessor : AbstractProcessor() {
         val classBuilder = TypeSpec.classBuilder(builderClassName)
 
         with(classBuilder) {
+            this.addOriginatingElement(typeElement)
             this.addModifiers(Modifier.PUBLIC, Modifier.FINAL)
             this.addTypeVariables(typeElement.typeParameters.map { TypeVariableName.get(it) })
             val constructors = ElementFilter.constructorsIn(typeElement.enclosedElements)
