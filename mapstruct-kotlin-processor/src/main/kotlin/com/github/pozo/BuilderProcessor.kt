@@ -8,8 +8,8 @@ import com.google.auto.service.AutoService
 import com.squareup.javapoet.JavaFile
 import com.squareup.javapoet.TypeSpec
 import com.squareup.javapoet.TypeVariableName
-import kotlinx.metadata.isData
-import kotlinx.metadata.jvm.KotlinClassMetadata
+import kotlin.metadata.isData
+import kotlin.metadata.jvm.KotlinClassMetadata
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Processor
 import javax.annotation.processing.RoundEnvironment
