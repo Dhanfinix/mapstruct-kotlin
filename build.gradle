@@ -1,11 +1,11 @@
 allprojects {
     group 'io.github.dhanfinix'
-    version '1.0.0-alpha4'
+    version '1.0.0-alpha5'
 }
 
 buildscript {
     ext {
-        kotlin_version = '2.0.0'
+        kotlin_version = '2.2.0'
         kotlinxMetadataVersion = '0.9.0'
         kotlinBuilderAnnotationVersion = '1.0-SNAPSHOT'
         autoServiceVersion = '1.0-rc7'
